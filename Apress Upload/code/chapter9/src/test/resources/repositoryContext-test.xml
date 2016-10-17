@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+		
+		<context:component-scan base-package="com.inflinx.book.ldap" />
+		
+		<bean id="contextSourceTarget" class="org.springframework.ldap.core.support.LdapContextSource">
+        	<property name="url" value="ldap://localhost:11389" />
+        	<property name="userDn" value="cn=Directory Manager" />
+			<property name="password" value="opendj" />
+        	<property name="base" value=""/>
+		</bean> 
+			
+		<bean id="contextSource" class="org.springframework.ldap.transaction.compensating.manager.TransactionAwareContextSourceProxy">
+			<constructor-arg ref="contextSourceTarget" />
+		</bean>
+				
+		<bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+			<constructor-arg ref="contextSource"  />
+		</bean>
+				
+		<bean id="transactionManager" 
+				class="org.springframework.ldap.transaction.compensating.manager.ContextSourceTransactionManager">
+			<property name="contextSource" ref="contextSource" />
+		</bean>
+		
+		<tx:annotation-driven transaction-manager="transactionManager" />
+		
+</beans>		

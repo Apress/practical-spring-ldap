@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+		
+		<context:component-scan base-package="com.inflinx.book.ldap" />
+		
+		<bean id="contextSource" class="org.ldapunit.context.EmbeddedContextSourceFactory">
+        	<property name="port" value="12389" />
+        	<property name="rootDn" value="dc=inflinx,dc=com" />
+        	<property name="serverType" value="OPENDJ" /> 
+		</bean>
+		
+		<bean id="odmManager" class="org.springframework.ldap.odm.core.impl.OdmManagerImpl">
+			<constructor-arg name="converterManager" ref="converterManager" />
+			<constructor-arg name="contextSource" ref="contextSource" />
+			<constructor-arg name="managedClasses">
+				<set>
+					<value>com.inflinx.book.ldap.domain.Patron</value>
+				</set>
+			</constructor-arg>
+		</bean>
+				
+		<bean id="fromStringConverter" class="org.springframework.ldap.odm.typeconversion.impl.converters.FromStringConverter" />
+		<bean id="toStringConverter" class="org.springframework.ldap.odm.typeconversion.impl.converters.ToStringConverter" />
+	
+		<!-- Configuration information for a single instance of FromString -->
+		<bean id="fromStringConverterConfig" class="org.springframework.ldap.odm.typeconversion.impl.ConverterManagerFactoryBean$ConverterConfig">
+			<property name="converter" ref="fromStringConverter" />
+			<property name="fromClasses">
+				<set>
+					<value>java.lang.String</value>
+				</set>
+			</property>
+			<property name="toClasses">
+				<set>
+					<value>java.lang.Byte</value>
+					<value>java.lang.Integer</value>
+					<value>java.lang.Boolean</value>
+				</set>
+			</property>
+		</bean>
+		
+		<bean id="toStringCoverterConfig" class="org.springframework.ldap.odm.typeconversion.impl.ConverterManagerFactoryBean$ConverterConfig">
+			<property name="converter" ref="toStringConverter" />
+			<property name="fromClasses">
+				<set>
+					<value>java.lang.Byte</value>
+					<value>java.lang.Integer</value>
+					<value>java.lang.Boolean</value>
+				</set>
+			</property>
+			<property name="toClasses">
+				<set>
+					<value>java.lang.String</value>
+				</set>
+			</property>
+		</bean>
+
+		<bean id="converterManager" class="org.springframework.ldap.odm.typeconversion.impl.ConverterManagerFactoryBean">
+			<property name="converterConfig">
+				<set>
+					<ref bean="fromStringConverterConfig"/>
+					<ref bean="toStringCoverterConfig"/>
+				</set>
+			</property>
+		</bean>
+		
+</beans>		
